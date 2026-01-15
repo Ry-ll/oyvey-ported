@@ -1,38 +1,29 @@
-package com.aetherx.client.modules.render;
+package me.ryll.oyvey.features.modules.render;
 
-import com.aetherx.client.modules.Module;
+import me.ryll.oyvey.features.modules.Module;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SpawnerBlockEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 
 public class SpawnerESP extends Module {
     public SpawnerESP() {
-        super("SpawnerESP");
+        super("SpawnerESP", "Detecta spawners en el rango cargado.", Category.RENDER, true, false, false);
     }
 
     @Override
     public void onTick() {
-        if (!isEnabled() || mc.world == null || mc.player == null) return;
+        if (nullCheck()) return;
 
-        // Recorremos las entidades de bloque cargadas en los chunks renderizados
         for (BlockEntity entity : mc.world.blockEntities) {
             if (entity instanceof SpawnerBlockEntity) {
-                BlockPos pos = entity.getPos();
-                
-                // Si es la primera vez que lo ve en este tick, podemos mandar una alerta
-                // Usamos el age del jugador para que no spammee el chat cada milisegundo
                 if (mc.player.age % 100 == 0) {
-                    mc.player.sendMessage(Text.of("§d[AetherX] §a¡Spawner localizado! §7en " + pos.toShortString()), false);
+                    mc.player.sendMessage(Text.of("§d[AetherX] §aSpawner: §7" + entity.getPos().toShortString()), false);
                 }
-                
-                // Aquí el motor de renderizado dibujará la caja (si tienes el sistema de render listo)
-                renderSpawnerBox(pos);
+                // Aquí podrías añadir el renderizado de caja de OyVey si lo necesitas
             }
         }
     }
-
-    private void renderSpawnerBox(BlockPos pos) {
+}
         // Esta función se conectará con tu clase de RenderUtils más adelante
         // para dibujar un cubo de color neón alrededor del spawner.
     }
