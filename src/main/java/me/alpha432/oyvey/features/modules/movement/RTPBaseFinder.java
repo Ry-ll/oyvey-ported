@@ -1,45 +1,37 @@
-package com.aetherx.client.modules.movement;
+package me.ryll.oyvey.features.modules.movement;
 
-import com.aetherx.client.modules.Module;
+import me.ryll.oyvey.features.modules.Module;
 import net.minecraft.block.Blocks;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 
 public class BaseFinder extends Module {
-    public BaseFinder() { 
-        super("BaseFinder"); 
+    public BaseFinder() {
+        super("BaseFinder", "RTP y baja a la capa 0 para buscar bases.", Category.MOVEMENT, true, false, false);
     }
 
     @Override
     public void onEnable() {
-        if (mc.player == null) return;
-        // Ejecuta el comando de teletransporte del servidor
+        if (nullCheck()) return;
         mc.player.networkHandler.sendCommand("rtp east");
-        mc.player.sendMessage(Text.of("§b[AetherX] §fBuscando base... Teletransportando y bajando a Y: 0"), false);
+        mc.player.sendMessage(Text.of("§b[AetherX] §fBuscando base en el Este..."), false);
     }
 
     @Override
     public void onTick() {
-        if (!isEnabled() || mc.player == null || mc.world == null) return;
+        if (nullCheck()) return;
 
-        BlockPos posDebajo = mc.player.getBlockPos().down();
-        
-        // --- SEGURIDAD (Anti-Lava / Anti-Vacío) ---
-        if (mc.world.getBlockState(posDebajo).getBlock() == Blocks.LAVA || 
-            mc.world.getBlockState(posDebajo).getBlock() == Blocks.AIR && mc.player.getY() < -60) {
-            mc.player.sendMessage(Text.of("§c[AetherX] Peligro detectado bajo tus pies. Deteniendo descenso."), true);
-            toggle();
-            return;
-        }
-
-        // --- LÓGICA DE DESCENSO ---
         if (mc.player.getY() > 0) {
-            // Forzamos al jugador a agacharse/bajar si está volando o rompiendo bloques hacia abajo
+            // Seguridad: si hay lava abajo, se detiene
+            if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.LAVA) {
+                mc.player.sendMessage(Text.of("§c[!] Lava detectada. Deteniendo."), true);
+                this.disable();
+                return;
+            }
             mc.options.sneakKey.setPressed(true);
         } else {
             mc.options.sneakKey.setPressed(false);
-            mc.player.sendMessage(Text.of("§a[AetherX] Has llegado a la capa 0. ¡Buena suerte con el raideo!"), false);
-            toggle(); // Se apaga solo al llegar al objetivo
+            mc.player.sendMessage(Text.of("§a[!] Capa 0 alcanzada."), false);
+            this.disable();
         }
     }
 }
